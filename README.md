@@ -15,7 +15,6 @@ By comparing model performance and analysing feature importance, this project de
 
 **early cancer detection**.
 
----
 
 ## 📊 Dataset
 - **Source:** UCI Machine Learning Repository – Breast Cancer Wisconsin Dataset  
