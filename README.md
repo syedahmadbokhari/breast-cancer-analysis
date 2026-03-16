@@ -1,127 +1,323 @@
 # Breast Cancer Classification using Machine Learning
 
-## 🔍 Project Summary
-- **Dataset:** UCI Breast Cancer Wisconsin (569 samples, 30 features)
-- **Models:** Logistic Regression, SVM, Random Forest, KNN, Decision Tree, Naive Bayes
-- **Best Result:** SVM achieved 97% accuracy with strong precision and recall
+## 🔬 Project Overview
+Breast cancer is one of the most common cancers worldwide, and early detection significantly improves patient survival rates. This project applies machine learning techniques to classify breast tumors as **benign** or **malignant** using diagnostic measurements extracted from cell nuclei.
 
+The project demonstrates an **end-to-end machine learning workflow**, including:
 
-## 📌 Project Overview
-Breast cancer is one of the most common cancers worldwide, and early detection significantly increases survival rates. Machine learning techniques can assist medical professionals by analysing diagnostic measurements and identifying patterns associated with malignant tumors.
+- Data preprocessing and exploratory analysis
+- Training and comparing multiple machine learning models
+- Model evaluation and interpretation
+- Saving the trained model
+- Deploying the model as a **REST API using FastAPI**
+- **Containerizing the application using Docker** for reproducible deployment
 
-The goal of this project is to develop predictive machine learning models capable of classifying tumors as malignant or benign using diagnostic features extracted from cell nuclei. The project evaluates multiple classification algorithms and identifies the most influential features that contribute to accurate cancer detection.
-
-By comparing model performance and analysing feature importance, this project demonstrates how predictive analytics can support early-stage cancer diagnosis and assist clinical decision-making.
-
-**early cancer detection**.
-
-
-## 📊 Dataset
-- **Source:** UCI Machine Learning Repository – Breast Cancer Wisconsin Dataset  
-- **Samples:** 569  
-- **Features:** 30 numerical diagnostic features  
-- **Target Variable:** Diagnosis (Malignant / Benign)
-
-Each feature represents characteristics of cell nuclei, such as radius, texture, perimeter, and smoothness.
-
-
-
-## 🔧 Data Preprocessing
-The dataset is relatively clean, but several preprocessing steps were applied:
-
-- Removed non-informative columns (`id`, unnamed column)
-- Checked for missing values (none found)
-- Reduced dimensionality by removing highly correlated features
-- Handled outliers using capping instead of removal
-- Encoded target variable (Malignant = 1, Benign = 0)
-- Split data into training and testing sets (70% / 30%)
-
-These steps helped reduce noise, avoid overfitting, and improve model stability.
+The deployed API allows users to submit tumor feature measurements and receive real-time cancer predictions.
 
 ---
 
-## 📈 Exploratory Data Analysis (EDA)
-EDA was performed to understand feature distributions, correlations, and class differences.
+# 📊 Dataset
 
-### Diagnosis Distribution
-The dataset contains more benign cases than malignant cases, indicating a mild class imbalance.
+**Source:** UCI Machine Learning Repository – Breast Cancer Wisconsin Dataset  
+
+Dataset characteristics:
+
+- **Samples:** 569
+- **Features:** 30 numerical diagnostic features
+- **Target Variable:** Diagnosis (Malignant / Benign)
+
+Each feature represents characteristics of cell nuclei such as:
+
+- Radius
+- Texture
+- Perimeter
+- Area
+- Smoothness
+- Compactness
+- Concavity
+- Symmetry
+
+These measurements allow machine learning models to identify patterns associated with cancerous tumors.
+
+---
+
+# 🔧 Data Preprocessing
+
+The following preprocessing steps were applied:
+
+- Removed non-informative columns (`id`, unnamed column)
+- Checked for missing values
+- Reduced dimensionality by removing highly correlated features
+- Handled outliers using value capping
+- Encoded target variable (Malignant = 1, Benign = 0)
+- Split dataset into **training and testing sets (70 / 30)**
+
+These steps helped reduce noise and improve model generalization.
+
+---
+
+# 📈 Exploratory Data Analysis
+
+EDA was performed to understand relationships between features and identify useful predictors.
+
+## Diagnosis Distribution
 
 ![Diagnosis Distribution](images/Bar%20Chart.png)
 
-### Feature Correlation
-Strong correlations were observed between size-related features such as **radius**, **perimeter**, and **area**, which informed feature selection and dimensionality reduction.
+The dataset contains slightly more **benign cases than malignant cases**, indicating mild class imbalance.
 
-![Correlation Heatmap](images/heatmap.png)
+---
 
-### Unsupervised Clustering
-K-Means clustering (after dimensionality reduction) showed a clear separation between malignant and benign cases, suggesting that the underlying data structure supports effective classification.
+## Feature Correlation
 
-![K-Means Clustering](images/K%20means%20Clustering.png)
+![Feature Correlation](images/heatmap.png)
 
+Size-related features such as **radius, perimeter, and area** show strong correlations.
 
+Understanding these correlations helps reduce redundancy and improve model performance.
 
-## 🤖 Models Trained
-The following classification models were implemented and evaluated:
+---
+
+## K-Means Clustering
+
+![KMeans Clustering](images/K%20means%20Clustering.png)
+
+Unsupervised clustering demonstrates that malignant and benign tumors naturally form separable groups.
+
+---
+
+# 🤖 Machine Learning Models
+
+The following models were trained and evaluated:
 
 | Model | Accuracy |
 |------|---------|
 | Logistic Regression | 97% |
-| Support Vector Machine (SVM) | **97% (Best)** |
+| Support Vector Machine | **97% (Best)** |
 | Random Forest | 95% |
-| K-Nearest Neighbors (KNN) | 95% (Cross-Validated) |
+| K-Nearest Neighbors | 95% |
 | Decision Tree | 94% |
 | Naive Bayes | 93% |
 
+---
 
+# 📊 Model Evaluation
 
-## 📈 Model Evaluation
-The **Support Vector Machine (SVM)** achieved the best overall performance with **97% accuracy**, demonstrating strong precision and recall across both benign and malignant cases.
+The **Support Vector Machine (SVM)** achieved the best performance with **97% accuracy**.
 
-![Confusion Matrix – SVM](images/confusion%20matrix.png)
+### Confusion Matrix
 
+![Confusion Matrix](images/confusion%20matrix.png)
 
-
-## 🏆 Key Results
-- SVM and Logistic Regression achieved the highest accuracy (97%)
-- Models demonstrated strong generalisation on unseen test data
-- Feature correlations highlighted the importance of size-related attributes
-- Clustering analysis confirmed natural separability between classes
+The model demonstrates strong precision and recall for both malignant and benign tumor detection.
 
 ---
 
-## ⚠️ Limitations & Future Improvements
-**Current limitations:**
-- Limited feature engineering
-- Partial hyperparameter tuning
-- Mild class imbalance
-- Cross-validation not applied uniformly across all models
+# 📊 Model Comparison
 
-**Potential improvements:**
-- Apply feature engineering techniques
-- Use GridSearchCV for hyperparameter tuning
-- Apply cross-validation to all models
-- Explore ensemble and advanced models
+![Model Comparison](images/model_comparison.png)
 
+---
 
+# 📈 ROC Curve
 
-## 🛠️ Tools & Technologies
-- Python  
-- Pandas, NumPy  
-- Matplotlib, Seaborn  
-- Scikit-learn  
-- Jupyter Notebook  
+![ROC Curve](images/roc_curve.png)
 
+The ROC curve shows strong classification capability across different decision thresholds.
 
+---
 
-## 📘 What I Learned
-- How to structure an end-to-end machine learning workflow from EDA to evaluation
-- The importance of feature correlation analysis in model performance
-- How different classifiers behave on high-dimensional medical data
-- How proper evaluation (confusion matrix, precision, recall) matters beyond accuracy
+# 🔍 Feature Importance
 
+![Feature Importance](images/feature_importance.png)
 
-## ▶️ How to Run the Project
+Feature importance analysis highlights the most influential tumor characteristics used by the model.
+
+---
+
+# 🔬 Model Explainability (SHAP)
+
+![SHAP Summary](images/shap_summary.png)
+
+SHAP values were used to interpret model predictions and understand how each feature contributes to classification.
+
+This improves **model transparency**, which is especially important for healthcare applications.
+
+---
+
+# 🚀 Model Deployment
+
+The trained model was exported using **Joblib** and deployed using **FastAPI**.
+
+FastAPI provides a REST interface that allows users to send tumor feature measurements and receive predictions.
+
+### Example Prediction Request
+
+```
+POST /predict
+```
+
+Example input:
+
+```json
+{
+  "radius_mean": 14.5,
+  "texture_mean": 20.3,
+  "perimeter_mean": 90.2,
+  "area_mean": 600.5,
+  "smoothness_mean": 0.1,
+  "compactness_mean": 0.15,
+  "concavity_mean": 0.12,
+  "concave_points_mean": 0.05,
+  "symmetry_mean": 0.18,
+  "fractal_dimension_mean": 0.07,
+  "radius_se": 0.5,
+  "texture_se": 0.2
+}
+```
+
+Example response:
+
+```json
+{
+ "prediction": "Benign tumor detected"
+}
+```
+
+---
+
+# 🌐 API Documentation
+
+FastAPI automatically generates interactive documentation.
+
+API interface available at:
+
+```
+http://localhost:8000/docs
+```
+
+Users can test predictions directly from the browser.
+
+---
+
+# 🐳 Docker Containerization
+
+The application is containerized using **Docker** to ensure consistent deployment across environments.
+
+Docker packages:
+
+- Python environment
+- dependencies
+- trained model
+- API server
+
+### Build Docker Image
+
+```bash
+docker build -t breast-cancer-api .
+```
+
+### Run Container
+
+```bash
+docker run -p 8000:8000 breast-cancer-api
+```
+
+Open:
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+# 🛠 Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Matplotlib
+- Seaborn
+- SHAP
+- FastAPI
+- Docker
+- Uvicorn
+- Jupyter Notebook
+
+---
+
+# 📘 What I Learned
+
+Through this project I learned:
+
+- Building an end-to-end machine learning workflow
+- Comparing classification models using multiple evaluation metrics
+- Interpreting model predictions using SHAP
+- Deploying machine learning models as REST APIs
+- Containerizing ML applications using Docker
+
+---
+
+# 📂 Project Structure
+
+```
+Breast-Cancer-ML
+│
+├── data
+│
+├── images
+│
+├── notebooks
+│   └── Breast-Cancer-Analysis.ipynb
+│
+├── models
+│   └── breast_cancer_model.pkl
+│
+├── api
+│   └── api.py
+│
+├── requirements.txt
+├── Dockerfile
+└── README.md
+```
+
+---
+
+# ▶️ How to Run the Project
+
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
-jupyter notebook breast-cancer-analysis.ipynb
+```
 
+Run API:
+
+```bash
+python -m uvicorn api.api:app --reload
+```
+
+Open API documentation:
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+# 🔮 Future Improvements
+
+Potential improvements include:
+
+- Advanced feature engineering
+- Hyperparameter optimization
+- Ensemble models
+- Cloud deployment (AWS / GCP)
+- Building a user interface for tumor prediction
+
+---
+
+# ⭐ Project Goal
+
+This project demonstrates how machine learning can support **early cancer detection** while showcasing the full lifecycle of an ML system from **data analysis to deployment**.
