@@ -302,22 +302,41 @@ Through this project I learned:
 ```
 Breast-Cancer-ML
 │
-├── data
+├── .github/
+│ └── workflows/
+│ └── ci.yml # CI/CD pipeline (GitHub Actions)
 │
-├── images
+├── api/
+│ └── api.py # FastAPI application
 │
-├── notebooks
-│   └── Breast-Cancer-Analysis.ipynb
+├── data/
+│ └── README.md # Dataset description
 │
-├── models
-│   └── breast_cancer_model.pkl
+├── docker/
+│ └── Dockerfile # Docker configuration
 │
-├── api
-│   └── api.py
+├── images/ # Visualizations used in README
+│ ├── Bar Chart.png
+│ ├── K means Clustering.png
+│ ├── confusion matrix.png
+│ ├── feature_importance.png
+│ ├── heatmap.png
+│ ├── model_comparison.png
+│ ├── roc_curve.png
+│ └── shap_summary.png
 │
-├── requirements.txt
-├── Dockerfile
-└── README.md
+├── models/
+│ ├── breast_cancer_model.pkl # Trained model
+│ └── scaler.pkl # Feature scaler
+│
+├── notebooks/
+│ ├── Breast-Cancer-Analysis.ipynb # Full ML workflow
+│ └── app.py # Streamlit application
+│
+├── predict.py # Prediction script
+├── requirements.txt # Dependencies
+├── README.md # Project documentation
+└── .gitignore # Ignored files
 ```
 
 ---
