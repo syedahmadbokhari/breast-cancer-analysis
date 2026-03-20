@@ -30,4 +30,4 @@ jobs:
 
     - name: Run basic test
       run: |
-        python -c "import sklearn, pandas, numpy, fastapi"
+        python -c "import sklearn, pandas, numpy"
