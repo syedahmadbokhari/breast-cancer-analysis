@@ -1,17 +1,24 @@
 # Breast Cancer Classification using Machine Learning
 
 ## 🔬 Project Overview
-Breast cancer is one of the most common cancers worldwide, and early detection significantly improves patient survival rates. This project applies machine learning techniques to classify breast tumors as **benign** or **malignant** using diagnostic measurements extracted from cell nuclei.
 
-The project demonstrates an **end-to-end machine learning workflow**, including:
+Breast cancer is one of the most common and life-threatening diseases worldwide, where early detection plays a critical role in improving patient survival rates. This project focuses on building a **machine learning-based classification system** that predicts whether a tumor is **benign or malignant** using diagnostic features extracted from medical imaging data.
 
-- Data preprocessing and exploratory analysis
-- Training and comparing multiple machine learning models
-- Model evaluation and interpretation
-- Saving the trained model
-- Deploying the model as a **REST API using FastAPI**
-- **Containerizing the application using Docker** for reproducible deployment
-- Interactive UI using Streamlit
+Beyond model development, this project is designed to demonstrate a **complete end-to-end machine learning engineering workflow**, bridging the gap between data science and real-world deployment. It showcases how a trained model can be transformed into a **production-ready application** using modern tools and cloud infrastructure.
+
+The system includes:
+
+* Data preprocessing and exploratory data analysis (EDA)
+* Training and comparison of multiple machine learning models
+* Model evaluation using metrics such as accuracy, ROC curves, and confusion matrices
+* Model interpretability using feature importance and SHAP analysis
+* Deployment of the trained model as a **REST API using FastAPI**
+* **Containerization using Docker** for reproducible and portable environments
+* Development of an **interactive web interface using Streamlit**
+* **Cloud deployment on AWS EC2**, making the application publicly accessible
+* Configuration of a **systemd service** for continuous uptime and automatic restarts
+
+This project demonstrates not only strong machine learning fundamentals but also practical skills in **backend development, cloud computing, and MLOps**, reflecting real-world practices used in deploying scalable machine learning systems.
 
 The deployed API allows users to submit tumor feature measurements and receive real-time cancer predictions.
 
