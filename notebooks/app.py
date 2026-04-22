@@ -205,6 +205,20 @@ if predict_clicked:
     confidence   = max(living_pct, deceased_pct)
     is_deceased  = prediction[0] == 1
 
+    # Clinical risk level based on deceased probability
+    if deceased_pct >= 70:
+        risk_level = "High Risk"
+        risk_color = "#b91c1c"
+        risk_note  = "Deceased probability ≥70% — elevated clinical concern."
+    elif deceased_pct >= 50:
+        risk_level = "Moderate Risk"
+        risk_color = "#d97706"
+        risk_note  = "Deceased probability 50–70% — borderline profile; close monitoring advised."
+    else:
+        risk_level = "Lower Risk"
+        risk_color = "#0f9b58"
+        risk_note  = "Deceased probability <50% — relatively favourable clinical profile."
+
     if is_deceased:
         st.markdown(f"""
         <div class="result-deceased">
@@ -219,6 +233,15 @@ if predict_clicked:
             <p class="result-label">Living</p>
             <p class="result-sub">Confidence {confidence:.1f}% &nbsp;·&nbsp; XGBoost (Optuna) · METABRIC</p>
         </div>""", unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div style="background:{risk_color};color:white;border-radius:8px;'
+        f'padding:0.55rem 1.1rem;font-weight:700;font-size:0.95rem;'
+        f'margin-bottom:0.5rem;display:inline-block;">'
+        f'{risk_level}</div>'
+        f'<p style="color:#555e6e;font-size:0.83rem;margin:0 0 1rem 0;">{risk_note}</p>',
+        unsafe_allow_html=True,
+    )
 
     col1, col2 = st.columns(2)
     with col1:

@@ -7,7 +7,7 @@
 | **Model type** | XGBoost Classifier (sklearn Pipeline) |
 | **Tuning** | Optuna — 40 trials, maximising 5-fold CV ROC-AUC |
 | **Pipeline steps** | StandardScaler → XGBClassifier |
-| **Version** | 2.0 |
+| **Version** | 3.0 |
 | **Artifact** | `models/pipeline.pkl` |
 | **Training date** | April 2026 |
 
@@ -52,28 +52,57 @@
 |---|---|
 | **Accuracy** | ~75% |
 | **ROC-AUC** | ~0.79 |
-| **CV ROC-AUC (5-fold)** | ~0.78 |
+| **5-fold CV ROC-AUC** | mean ± std reported in notebook |
+| **Cox PH C-index** | reported in notebook |
 
 Evaluated on held-out 30% test set (stratified split, random_state=40).
 
+## Survival Modelling (Cox PH)
+
+A Cox Proportional Hazards model was fitted alongside the classifier to model **time-to-event** data using `Overall Survival (Months)`. Outputs include hazard ratios with 95% CIs for all 14 features, predicted survival curves for high-risk vs low-risk archetypes, and a concordance index (C-index) for direct comparison to XGBoost ROC-AUC.
+
+## Robust Validation
+
+Stratified 5-fold cross-validation reports mean ± std for ROC-AUC, accuracy, and F1. Learning curves diagnose underfitting vs overfitting across training set sizes.
+
+## Error Analysis
+
+False negatives (Deceased predicted as Living) are the highest-risk errors. The analysis compares mean feature profiles of false negatives vs true positives, identifying where the model is most likely to miss high-risk patients.
+
+## Probability Calibration
+
+Raw XGBoost probabilities are calibrated with Platt scaling (`CalibratedClassifierCV`, 3-fold). The calibration curve demonstrates before/after improvement, ensuring predicted probabilities reflect true empirical risk.
+
+## Risk Levels (API & UI)
+
+| Deceased Probability | Risk Level |
+|---|---|
+| ≥ 70% | High |
+| 50–70% | Moderate |
+| < 50% | Lower |
+
+## Prediction Monitoring
+
+Every API call is logged to `logs/predictions.csv` with timestamp, request ID, prediction, probabilities, confidence, and all input features. The `/logs` endpoint returns the last N records.
+
 ## Limitations
 
-- **Clinical features only** — no genomic or gene expression data, which are strong predictors
-- **Classification only** — does not model time-to-event (no survival curves per patient)
-- **Single cohort** — trained on METABRIC; may not generalise to other populations or treatment eras
-- **Missing data** — rows with missing survival status dropped (~21%); imputation used for features
-- **Class imbalance** — more deceased than living patients; handled via `scale_pos_weight`
+- **Clinical features only** — no genomic or gene expression data
+- **Classification only** — deployed model does not produce time-to-event curves per patient
+- **Single cohort** — METABRIC is UK/Canada; may not generalise globally
+- **Missing data** — ~21% of rows dropped due to missing survival status
+- **Class imbalance** — handled via `scale_pos_weight`
 
 ## Bias and Fairness Considerations
 
-- Dataset is predominantly female (consistent with breast cancer epidemiology)
-- Age and menopausal state are correlated — model may reflect demographic patterns rather than causal factors
-- METABRIC is a UK/Canada cohort — outcomes may differ for other ethnicities or healthcare systems
-- Treatment indicators (chemo, hormone, radio) reflect past clinical decisions, not purely biological factors
+- Dataset is predominantly female
+- Age and menopausal state are correlated — model may capture demographic patterns
+- METABRIC is a UK/Canada cohort — outcomes may differ across ethnicities and healthcare systems
+- Treatment indicators reflect past clinical decisions, not purely biological factors
 
 ## Ethical Considerations
 
-This model **must not** be used to make or influence clinical decisions about real patients. Survival prediction is inherently uncertain and involves factors beyond the scope of this dataset. Any clinical use requires regulatory approval, prospective validation, and clinician oversight.
+This model **must not** be used to make or influence clinical decisions about real patients. Any clinical use requires regulatory approval, prospective validation, and clinician oversight.
 
 ## How to Use
 
