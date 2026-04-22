@@ -1,78 +1,76 @@
-# Breast Cancer Survival Prediction — METABRIC Dataset
+# 🧬 Breast Cancer Survival Prediction — METABRIC Dataset
 
-A machine learning project that predicts breast cancer patient survival outcome (Living or Deceased) using clinical data from the METABRIC dataset. Includes a trained Random Forest model, a Streamlit web app, and a FastAPI REST endpoint.
+A machine learning project that predicts **breast cancer patient survival outcomes** (Living vs Deceased) using clinical data from the METABRIC dataset.
+
+This project demonstrates a **production-style end-to-end ML workflow**, including data preprocessing, model training, explainability, and deployment via API and web interface.
 
 ---
 
-## Dataset
+## 🔬 Project Overview
 
-**METABRIC** (Molecular Taxonomy of Breast Cancer International Consortium)
+This project upgrades from a simple benchmark dataset to the **METABRIC dataset**, which reflects real-world clinical complexity.
+
+The system includes:
+
+- Data preprocessing & feature engineering
+- Training and comparison of multiple ML models
+- Model evaluation using ROC-AUC and classification metrics
+- Model explainability (Feature Importance + SHAP)
+- REST API using FastAPI
+- Interactive UI using Streamlit
+- Docker containerization
+
+---
+
+## 📊 Dataset
+
+### METABRIC (Molecular Taxonomy of Breast Cancer International Consortium)
 
 | Property | Value |
 |---|---|
-| Source | Kaggle — Breast Cancer Gene Expression Profiles (METABRIC) |
-| Patients | 2,509 total — 1,981 usable after removing missing targets |
-| Target | `Overall Survival Status` (Living = 0, Deceased = 1) |
-| Class split | 837 Living / 1,144 Deceased |
+| Patients | 2,509 total (~1,981 usable) |
+| Target | Overall Survival Status |
+| Classes | Living (0) / Deceased (1) |
 
-### Features Used (14)
+### Features Used (14 Clinical Features)
 
-| Feature | Type | Description |
-|---|---|---|
-| `age_at_diagnosis` | Numeric | Patient age at diagnosis |
-| `tumor_size` | Numeric | Tumor size in mm |
-| `neoplasm_histologic_grade` | Numeric | Grade 1 / 2 / 3 |
-| `lymph_nodes_examined_positive` | Numeric | Number of positive lymph nodes |
-| `mutation_count` | Numeric | Total somatic mutation count |
-| `nottingham_prognostic_index` | Numeric | Composite clinical severity score |
-| `er_status` | Encoded | Estrogen receptor status (1=Positive, 0=Negative) |
-| `her2_status` | Encoded | HER2 receptor status (1=Positive, 0=Negative) |
-| `pr_status` | Encoded | Progesterone receptor status (1=Positive, 0=Negative) |
-| `chemotherapy` | Encoded | Received chemotherapy (1=Yes, 0=No) |
-| `hormone_therapy` | Encoded | Received hormone therapy (1=Yes, 0=No) |
-| `radio_therapy` | Encoded | Received radiotherapy (1=Yes, 0=No) |
-| `type_of_breast_surgery` | Encoded | Surgery type (1=Mastectomy, 0=Breast Conserving) |
-| `inferred_menopausal_state` | Encoded | Menopausal state (1=Post, 0=Pre) |
+- Age at diagnosis
+- Tumor size
+- Histologic grade
+- Lymph node involvement
+- Mutation count
+- Nottingham Prognostic Index (NPI)
+- ER / PR / HER2 receptor status
+- Treatment indicators (chemotherapy, radiotherapy, hormone therapy)
+- Surgery type
+- Menopausal state
+
+> 👉 Focus on **clinical features** improves interpretability and real-world relevance.
 
 ---
 
-## Project Structure
+## 🔧 Machine Learning Pipeline
 
+```text
+Data → Preprocessing → Feature Engineering → Model Training → Evaluation → Deployment
 ```
-Breast-Cancer-ML/
-├── data/
-│   └── Breast Cancer METABRIC.csv   # METABRIC clinical dataset
-├── notebooks/
-│   ├── Breast-Cancer-Analysis.ipynb # Full ML pipeline
-│   ├── app.py                       # Streamlit prediction web app
-│   ├── api.py                       # FastAPI REST endpoint
-│   └── predict.py                   # Standalone prediction script
-├── models/
-│   ├── breast_cancer_model.pkl      # Trained Random Forest model
-│   └── scaler.pkl                   # Fitted StandardScaler
-├── images/
-│   ├── feature_importance.png
-│   └── roc_curve.png
-├── requirements.txt
-└── Dockerfile
-```
+
+**Key Steps:**
+
+1. Data cleaning & missing value imputation
+2. Encoding categorical variables
+3. Outlier handling (IQR capping)
+4. Feature scaling (StandardScaler)
+5. Train/test split (70/30, stratified)
+6. Model training (6 algorithms)
+7. Evaluation (ROC, confusion matrix)
+8. Explainability (Feature Importance + SHAP)
 
 ---
 
-## ML Pipeline (Notebook)
+## 🤖 Model Performance
 
-1. **Load & explore** METABRIC CSV
-2. **Preprocess** — encode categorical variables, impute missing values with median/mode
-3. **EDA** — survival distributions, feature histograms, correlation heatmap
-4. **Outlier handling** — IQR capping on numeric features
-5. **Clustering** — K-Means (k=2) with PCA projection
-6. **Train/test split** — 70/30, stratified
-7. **Scale** — StandardScaler fitted on training set
-8. **Train & compare** 6 classifiers
-9. **Evaluate** — classification report, confusion matrix, ROC curve
-10. **Explain** — Random Forest feature importance + SHAP beeswarm
-
-### Model Comparison
+### 📊 Model Comparison
 
 | Model | Accuracy |
 |---|---|
@@ -83,77 +81,83 @@ Breast-Cancer-ML/
 | Naive Bayes | 64.0% |
 | Decision Tree | 60.8% |
 
-**Saved model:** Random Forest — `n_estimators=200`, `class_weight='balanced'`
-**ROC-AUC:** 0.73
+**Selected Model: Random Forest**
+- `n_estimators = 200`
+- `class_weight = 'balanced'`
 
 ---
 
-## Installation
+### 📈 ROC Curve
 
-```bash
-pip install -r requirements.txt
+![ROC Curve](./images/roc_curve.png)
+
+- **ROC-AUC: 0.73**
+- Demonstrates realistic performance on clinical data
+
+---
+
+### 🔍 Feature Importance
+
+![Feature Importance](./images/feature_importance.png)
+
+**Top contributing features:**
+
+1. Nottingham Prognostic Index
+2. Tumor Size
+3. Age at Diagnosis
+4. Lymph Node Involvement
+
+> 👉 These align with established clinical risk factors for breast cancer survival.
+
+---
+
+## 🚀 Deployment
+
+### 🧠 Architecture
+
+```
+User → Streamlit UI → FastAPI → ML Model → Prediction
 ```
 
----
-
-## Usage
-
-### Streamlit Web App
+### 🖥 Streamlit App
 
 ```bash
 streamlit run notebooks/app.py
 ```
 
-Opens a browser UI where you enter patient clinical data and get an instant survival prediction with confidence score.
+- Interactive UI for entering patient data
+- Real-time prediction with probabilities
 
-### FastAPI
+### ⚡ FastAPI
 
 ```bash
 uvicorn notebooks.api:app --reload
 ```
 
-API available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+API available at `http://localhost:8000/docs`
 
-**Example request:**
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age_at_diagnosis": 65.0,
-    "tumor_size": 28.0,
-    "neoplasm_histologic_grade": 2.0,
-    "lymph_nodes_examined_positive": 1.0,
-    "mutation_count": 3.0,
-    "nottingham_prognostic_index": 4.5,
-    "er_status": 1.0,
-    "her2_status": 0.0,
-    "pr_status": 1.0,
-    "chemotherapy": 0.0,
-    "hormone_therapy": 1.0,
-    "radio_therapy": 1.0,
-    "type_of_breast_surgery": 0.0,
-    "inferred_menopausal_state": 1.0
-  }'
-```
-
-**Example response:**
+### 🧪 Example Request
 
 ```json
 {
-  "prediction": "Living",
-  "living_probability": 0.6300,
-  "deceased_probability": 0.3700
+  "age_at_diagnosis": 65.0,
+  "tumor_size": 28.0,
+  "neoplasm_histologic_grade": 2.0,
+  "lymph_nodes_examined_positive": 1.0,
+  "mutation_count": 3.0,
+  "nottingham_prognostic_index": 4.5,
+  "er_status": 1,
+  "her2_status": 0,
+  "pr_status": 1,
+  "chemotherapy": 0,
+  "hormone_therapy": 1,
+  "radio_therapy": 1,
+  "type_of_breast_surgery": 0,
+  "inferred_menopausal_state": 1
 }
 ```
 
-### Standalone Script
-
-```bash
-python notebooks/predict.py
-```
-
-### Docker
+### 📦 Docker
 
 ```bash
 docker build -t breast-cancer-api .
@@ -162,23 +166,58 @@ docker run -p 8000:8000 breast-cancer-api
 
 ---
 
-## Feature Encoding Reference
+## 📂 Project Structure
 
-| Feature | Value | Encoded |
-|---|---|---|
-| ER / HER2 / PR Status | Positive | 1 |
-| ER / HER2 / PR Status | Negative | 0 |
-| Chemotherapy / Hormone Therapy / Radio Therapy | Yes | 1 |
-| Chemotherapy / Hormone Therapy / Radio Therapy | No | 0 |
-| Type of Breast Surgery | Mastectomy | 1 |
-| Type of Breast Surgery | Breast Conserving | 0 |
-| Inferred Menopausal State | Post | 1 |
-| Inferred Menopausal State | Pre | 0 |
-| Overall Survival Status (target) | Deceased | 1 |
-| Overall Survival Status (target) | Living | 0 |
+```
+Breast-Cancer-ML/
+│
+├── data/
+│   └── Breast Cancer METABRIC.csv
+├── models/
+│   ├── breast_cancer_model.pkl
+│   └── scaler.pkl
+├── notebooks/
+│   ├── Breast-Cancer-Analysis.ipynb
+│   ├── app.py
+│   ├── api.py
+│   └── predict.py
+├── images/
+│   ├── feature_importance.png
+│   └── roc_curve.png
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-## Disclaimer
+## ⚠️ Limitations
 
-This project is for educational and research purposes only. Predictions made by this model are **not** a substitute for professional medical diagnosis or clinical judgement.
+- Moderate accuracy (~70%) due to real-world data complexity
+- Only clinical features used (no genomic data)
+- No time-to-event survival modeling (classification only)
+
+---
+
+## 🔮 Future Improvements
+
+- Add survival analysis (Cox proportional hazards model)
+- Incorporate gene expression features
+- Implement monitoring & logging
+- Add API authentication
+- Deploy using Kubernetes / AWS ECS
+
+---
+
+## 🧠 Key Takeaways
+
+- Handling real-world healthcare datasets
+- Building production-style ML pipelines
+- Deploying ML models via API + UI
+- Interpreting predictions responsibly
+
+---
+
+## ⚠️ Disclaimer
+
+This project is for **educational purposes only** and is not intended for medical use.
