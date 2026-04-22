@@ -6,15 +6,15 @@
 ![CI](https://img.shields.io/github/actions/workflow/status/syedahmadbokhari/breast-cancer-analysis/ci.yml?branch=metabric&label=CI)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-# 🧬 Breast Cancer Survival Prediction — METABRIC Dataset
+# Breast Cancer Survival Prediction — METABRIC Dataset
 
 A machine learning project that predicts **breast cancer patient survival outcomes** (Living vs Deceased) using clinical data from the METABRIC dataset.
 
-This project demonstrates a **production-style end-to-end ML workflow**, including data preprocessing, model training, hyperparameter optimisation, explainability, and deployment via API and web interface.
+This project demonstrates a **production-grade end-to-end ML workflow**, including survival modelling, robust validation, error analysis, probability calibration, prediction monitoring, and deployment via API and web interface.
 
 ---
 
-## 🔬 Project Overview
+## Project Overview
 
 This project uses the **METABRIC dataset**, which reflects real-world clinical complexity — unlike simple benchmark datasets.
 
@@ -22,19 +22,24 @@ The system includes:
 
 - Data preprocessing & feature engineering
 - Survival analysis with Kaplan-Meier curves
+- **Cox Proportional Hazards survival model** with hazard ratios and survival curves
 - Training and comparison of multiple ML models
 - Hyperparameter optimisation with **Optuna** (40 trials)
 - Final model packaged as a **sklearn Pipeline** (scaler + XGBoost)
-- Model evaluation using ROC-AUC and classification metrics
+- **Stratified 5-fold CV** with mean ± std metrics
+- **Learning curves** for bias/variance diagnosis
+- **Error analysis** — false negative profiling vs true positives
+- **Probability calibration** with Platt scaling
 - Model explainability (Feature Importance + SHAP)
-- REST API using FastAPI
-- Interactive UI using Streamlit
+- REST API using FastAPI with **prediction logging** and `/logs` endpoint
+- Interactive UI using Streamlit with **risk level indicator**
+- Unit tests with pytest + FastAPI TestClient
 - Docker containerisation
-- GitHub Actions CI
+- GitHub Actions CI (syntax + model validation + pytest)
 
 ---
 
-## 📊 Dataset
+## Dataset
 
 ### METABRIC (Molecular Taxonomy of Breast Cancer International Consortium)
 
@@ -57,11 +62,9 @@ The system includes:
 - Surgery type
 - Menopausal state
 
-> 👉 Focus on **clinical features** improves interpretability and real-world relevance.
-
 ---
 
-## 🔧 Machine Learning Pipeline
+## Machine Learning Pipeline
 
 ```text
 Data → Preprocessing → Kaplan-Meier EDA → Model Training → Optuna Tuning → Pipeline → Deployment
@@ -77,12 +80,16 @@ Data → Preprocessing → Kaplan-Meier EDA → Model Training → Optuna Tuning
 6. 6-model comparison (baseline)
 7. XGBoost + Optuna hyperparameter tuning (40 trials)
 8. Final sklearn Pipeline: StandardScaler → XGBoost
-9. Evaluation (ROC, confusion matrix, classification report)
-10. Explainability (Feature Importance + SHAP)
+9. Cox PH survival model with hazard ratios
+10. Stratified 5-fold CV + learning curves
+11. Error analysis (false negative profiling)
+12. Probability calibration (Platt scaling)
+13. Evaluation (ROC, confusion matrix, classification report)
+14. Explainability (Feature Importance + SHAP)
 
 ---
 
-## 📈 Survival Analysis — Kaplan-Meier Curves
+## Survival Analysis — Kaplan-Meier Curves
 
 ![Kaplan-Meier Curves](./images/kaplan_meier.png)
 
@@ -90,9 +97,45 @@ Survival curves split by ER Status, HER2 Status, and Histologic Grade — showin
 
 ---
 
-## 🤖 Model Performance
+## Cox Proportional Hazards Survival Model
 
-### 📊 Model Comparison
+![Cox Survival Curves](./images/cox_survival_curves.png)
+
+**Left:** Hazard ratio forest plot with 95% CIs for all 14 clinical features. Features with HR > 1 increase mortality risk.
+
+**Right:** Predicted survival curves for a high-risk archetype (elderly, grade 3, HER2+, no hormone therapy) vs a low-risk archetype (young, grade 1, ER+, hormone therapy). The gap quantifies clinically meaningful risk stratification.
+
+The Cox C-index is directly comparable to XGBoost ROC-AUC, enabling apples-to-apples comparison between survival modelling and classification.
+
+---
+
+## Robust Validation — Stratified K-Fold CV & Learning Curves
+
+![Learning Curves](./images/learning_curves.png)
+
+Stratified 5-fold cross-validation reports **mean ± std** for ROC-AUC, accuracy, and F1 — far more reliable than a single split. Learning curves diagnose whether the model would benefit from more data or a more complex architecture.
+
+---
+
+## Error Analysis — False Negatives
+
+![Error Analysis](./images/error_analysis.png)
+
+**False negatives** (Deceased patients predicted as Living) are the highest-risk errors in a clinical context. The feature mean comparison between false negatives and true positives reveals which clinical profiles the model struggles with — directly informing threshold tuning.
+
+---
+
+## Probability Calibration
+
+![Calibration Curve](./images/calibration_curve.png)
+
+Raw XGBoost probabilities are over-confident. **Platt scaling** corrects the calibration so that a predicted 70% risk reflects a true empirical ~70% event rate — critical for reliable clinical risk communication.
+
+---
+
+## Model Performance
+
+### Model Comparison
 
 | Model | Accuracy |
 |---|---|
@@ -111,7 +154,7 @@ Survival curves split by ER Status, HER2 Status, and Histologic Grade — showin
 
 ---
 
-### 📈 ROC Curve
+### ROC Curve
 
 ![ROC Curve](./images/roc_curve.png)
 
@@ -119,7 +162,7 @@ Survival curves split by ER Status, HER2 Status, and Histologic Grade — showin
 
 ---
 
-### 🔍 Feature Importance
+### Feature Importance
 
 ![Feature Importance](./images/feature_importance.png)
 
@@ -130,19 +173,21 @@ Survival curves split by ER Status, HER2 Status, and Histologic Grade — showin
 3. Age at Diagnosis
 4. Lymph Node Involvement
 
-> 👉 These align with established clinical risk factors for breast cancer survival.
+> These align with established clinical risk factors for breast cancer survival.
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
-### 🧠 Architecture
+### Architecture
 
 ```
 User → Streamlit UI → FastAPI → sklearn Pipeline → Prediction
+                                      |
+                               logs/predictions.csv
 ```
 
-### 🖥 Streamlit App
+### Streamlit App
 
 ```bash
 streamlit run notebooks/app.py
@@ -150,9 +195,10 @@ streamlit run notebooks/app.py
 
 - Interactive UI with sidebar inputs grouped by clinical section
 - Colour-coded result card (green = Living, red = Deceased)
+- **Risk level badge** (High / Moderate / Lower) with clinical interpretation
 - Probability bars with confidence score
 
-### ⚡ FastAPI
+### FastAPI
 
 ```bash
 uvicorn notebooks.api:app --reload
@@ -160,7 +206,7 @@ uvicorn notebooks.api:app --reload
 
 Interactive docs at `http://localhost:8000/docs`
 
-### 🧪 Example Request
+### Example Request
 
 ```json
 {
@@ -185,14 +231,24 @@ Interactive docs at `http://localhost:8000/docs`
 
 ```json
 {
+  "request_id": "a3f1b2c4",
   "prediction": "Living",
+  "risk_level": "Lower",
   "living_probability": 0.71,
   "deceased_probability": 0.29,
   "confidence": 71.0
 }
 ```
 
-### 📦 Docker
+### Prediction Monitoring
+
+Every request is logged to `logs/predictions.csv`. Retrieve recent predictions:
+
+```bash
+GET /logs?n=20
+```
+
+### Docker
 
 ```bash
 docker build -t breast-cancer-api .
@@ -201,14 +257,25 @@ docker run -p 8000:8000 breast-cancer-api
 
 ---
 
-## 📂 Project Structure
+## Testing
+
+```bash
+pip install pytest httpx
+pytest tests/ -v
+```
+
+8 tests covering: home endpoint, valid prediction, probability sum, confidence score, high-risk patient, invalid schema (422), missing fields (422), and logs endpoint.
+
+---
+
+## Project Structure
 
 ```
 Breast-Cancer-ML/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                       # GitHub Actions CI
+│       └── ci.yml                       # GitHub Actions CI (syntax + model + pytest)
 ├── data/
 │   └── Breast Cancer METABRIC.csv
 ├── models/
@@ -220,10 +287,19 @@ Breast-Cancer-ML/
 │   ├── app.py                           # Streamlit UI
 │   ├── api.py                           # FastAPI REST endpoint
 │   └── predict.py                       # Standalone script
+├── tests/
+│   ├── conftest.py                      # pytest setup
+│   └── test_api.py                      # API unit tests
 ├── images/
 │   ├── kaplan_meier.png
+│   ├── cox_survival_curves.png
+│   ├── learning_curves.png
+│   ├── error_analysis.png
+│   ├── calibration_curve.png
 │   ├── feature_importance.png
 │   └── roc_curve.png
+├── logs/
+│   └── .gitkeep                         # Prediction logs (CSV) written at runtime
 ├── MODEL_CARD.md                        # Model documentation
 ├── Dockerfile
 ├── requirements.txt
@@ -232,35 +308,29 @@ Breast-Cancer-ML/
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 - Moderate accuracy (~75%) due to real-world data complexity
 - Clinical features only — no genomic or gene expression data
-- No time-to-event survival modelling (classification only)
+- No per-patient time-to-event curves in the deployed API (classification pipeline)
 - Single cohort (UK/Canada) — may not generalise globally
 
 ---
 
-## 🔮 Future Improvements
-
-- Add Cox proportional hazards survival model
-- Incorporate gene expression features
-- Implement request logging and model monitoring
-- Add API authentication
-- Deploy with Kubernetes / AWS ECS
-
----
-
-## 🧠 Key Takeaways
+## Key Takeaways
 
 - Handling real-world healthcare datasets
 - Building production-style ML pipelines with sklearn `Pipeline`
+- Survival analysis with Kaplan-Meier and Cox PH models
 - Hyperparameter optimisation with Optuna
-- Deploying ML models via API + UI
+- Robust validation: stratified K-fold CV + learning curves
+- Error analysis for clinical risk awareness
+- Probability calibration for reliable risk communication
+- Deploying ML models via API + UI with prediction monitoring
 - Interpreting predictions responsibly with SHAP
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This project is for **educational purposes only** and is not intended for medical use. See [MODEL_CARD.md](./MODEL_CARD.md) for full limitations and ethical considerations.

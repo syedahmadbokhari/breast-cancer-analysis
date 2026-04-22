@@ -21,7 +21,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt && pip install pytest httpx
 
       - name: Check syntax — app.py
         run: python -m py_compile notebooks/app.py
@@ -61,3 +61,6 @@ jobs:
 
           print(f"Validation passed — prediction={pred[0]}, probabilities={prob[0].round(4)}")
           EOF
+
+      - name: Run API unit tests
+        run: pytest tests/ -v --tb=short

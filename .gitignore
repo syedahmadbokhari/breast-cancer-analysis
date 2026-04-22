@@ -7,5 +7,10 @@ __pycache__/
 .ipynb_checkpoints/
 notebooks/h.png
 
+# Logs (keep directory, ignore data files)
+logs/*.csv
+logs/*.log
+
 # Local tooling
 .claude/
+patch_notebook.py
