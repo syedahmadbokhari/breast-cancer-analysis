@@ -37,9 +37,13 @@ The system includes:
 - Docker containerisation
 - GitHub Actions CI (syntax + model validation + pytest)
 
+---
 
-## Streamlit Dashboard
-# https://breast-cancer-analysis-ktzyqyr4fcgbfx4exsd4q7.streamlit.app/
+## Live Demo
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://breast-cancer-analysis-ktzyqyr4fcgbfx4exsd4q7.streamlit.app/)
+
+---
 
 ## Dataset
 
