@@ -1,6 +1,10 @@
 import os
+import warnings
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import joblib
+import shap
 import streamlit as st
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -134,6 +138,29 @@ FEATURE_NAMES = [
     "hormone_therapy", "radio_therapy", "type_of_breast_surgery", "inferred_menopausal_state"
 ]
 
+FEATURE_LABELS = {
+    "age_at_diagnosis":             "Age at Diagnosis",
+    "tumor_size":                   "Tumor Size (mm)",
+    "neoplasm_histologic_grade":    "Histologic Grade",
+    "lymph_nodes_examined_positive":"Positive Lymph Nodes",
+    "mutation_count":               "Mutation Count",
+    "nottingham_prognostic_index":  "Nottingham PI",
+    "er_status":                    "ER Status",
+    "her2_status":                  "HER2 Status",
+    "pr_status":                    "PR Status",
+    "chemotherapy":                 "Chemotherapy",
+    "hormone_therapy":              "Hormone Therapy",
+    "radio_therapy":                "Radio Therapy",
+    "type_of_breast_surgery":       "Surgery Type",
+    "inferred_menopausal_state":    "Menopausal State",
+}
+
+@st.cache_resource
+def get_shap_explainer():
+    return shap.TreeExplainer(pipeline.named_steps["model"])
+
+explainer = get_shap_explainer()
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## Patient Data")
@@ -257,6 +284,48 @@ if predict_clicked:
             <div class="prob-val">{deceased_pct:.1f}%</div>
         </div>""", unsafe_allow_html=True)
         st.progress(int(deceased_pct))
+
+    # ── SHAP explanation ──────────────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("#### Why this prediction?")
+    st.caption(
+        "SHAP values show each feature's contribution to this specific prediction. "
+        "Red bars push toward **Deceased**; green bars push toward **Living**."
+    )
+
+    scaled_input = pipeline.named_steps["scaler"].transform(input_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        shap_vals = explainer.shap_values(scaled_input, check_additivity=False)
+
+    if isinstance(shap_vals, list):
+        sv = shap_vals[1]
+    elif np.array(shap_vals).ndim == 3:
+        sv = np.array(shap_vals)[:, :, 1]
+    else:
+        sv = np.array(shap_vals)
+
+    sv_row = sv[0]
+    labels  = [FEATURE_LABELS[f] for f in FEATURE_NAMES]
+    order   = np.argsort(np.abs(sv_row))[::-1]
+    sv_sorted     = sv_row[order]
+    labels_sorted = [labels[i] for i in order]
+
+    colors = ["#ef4444" if v > 0 else "#0f9b58" for v in sv_sorted]
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    bars = ax.barh(labels_sorted[::-1], sv_sorted[::-1], color=colors[::-1], height=0.55)
+    ax.axvline(0, color="#555e6e", linewidth=0.8)
+    ax.set_xlabel("SHAP value  (impact on Deceased probability)", fontsize=9)
+    ax.set_title("Feature Contributions for This Patient", fontsize=11, fontweight="bold", pad=10)
+    ax.tick_params(axis="y", labelsize=9)
+    ax.tick_params(axis="x", labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.patch.set_facecolor("#f8f9fb")
+    ax.set_facecolor("#f8f9fb")
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("View Input Summary"):

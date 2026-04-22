@@ -95,7 +95,11 @@ Data → Preprocessing → Kaplan-Meier EDA → Model Training → Optuna Tuning
 
 ![Kaplan-Meier Curves](./images/kaplan_meier.png)
 
-Survival curves split by ER Status, HER2 Status, and Histologic Grade — showing how clinical subgroups diverge over time.
+Three clinically meaningful subgroup splits:
+
+- **ER Status:** ER-positive patients show consistently higher survival probability across the entire follow-up window — consistent with the well-established role of estrogen-driven tumour growth and the effectiveness of hormone therapy for ER+ disease.
+- **HER2 Status:** HER2-positive patients diverge downward early, reflecting the aggressive biology of HER2-amplified tumours. The separation narrows at later time points, likely reflecting the effect of targeted treatments in the cohort.
+- **Histologic Grade:** Grade 3 (poorly differentiated) shows the steepest decline, confirming that tumour differentiation is one of the strongest independent predictors of outcome — a finding the model captures through the Nottingham Prognostic Index.
 
 ---
 
@@ -103,11 +107,11 @@ Survival curves split by ER Status, HER2 Status, and Histologic Grade — showin
 
 ![Cox Survival Curves](./images/cox_survival_curves.png)
 
-**Left:** Hazard ratio forest plot with 95% CIs for all 14 clinical features. Features with HR > 1 increase mortality risk.
+**Left:** Hazard ratio forest plot with 95% CIs for all 14 clinical features. Features with HR > 1 increase mortality risk; HR < 1 is protective. The Nottingham Prognostic Index, lymph node involvement, and histologic grade are the strongest mortality drivers — consistent with decades of clinical evidence. ER-positive and hormone therapy status show protective HRs, confirming the KM curve findings with proper covariate adjustment.
 
-**Right:** Predicted survival curves for a high-risk archetype (elderly, grade 3, HER2+, no hormone therapy) vs a low-risk archetype (young, grade 1, ER+, hormone therapy). The gap quantifies clinically meaningful risk stratification.
+**Right:** Predicted survival curves for a high-risk archetype (age 75, grade 3, HER2+, 8 positive nodes, no hormone therapy) vs a low-risk archetype (age 45, grade 1, ER+, 0 nodes, hormone therapy). The gap at 100 months exceeds 50 percentage points, quantifying how much the combined clinical profile shifts absolute survival probability — not just relative risk.
 
-The Cox C-index is directly comparable to XGBoost ROC-AUC, enabling apples-to-apples comparison between survival modelling and classification.
+The Cox C-index is directly comparable to XGBoost ROC-AUC, enabling apples-to-apples comparison between the two modelling approaches.
 
 ---
 
@@ -153,6 +157,8 @@ Raw XGBoost probabilities are over-confident. **Platt scaling** corrects the cal
 - Tuned with Optuna (40 trials, 5-fold CV ROC-AUC objective)
 - `scale_pos_weight` for class imbalance
 - Packaged as a single `pipeline.pkl` — no separate scaler needed
+
+> **On accuracy:** 75% on METABRIC is a strong result for a pure clinical feature model. This dataset reflects real-world complexity: the outcome (10+ year survival) depends on treatment decisions made decades ago, genomic factors not captured here, and competing causes of death unrelated to cancer. Published clinical survival models using similar feature sets (NPI-based tools, PREDICT) achieve 70–80% concordance on comparable cohorts. Incorporating gene expression data (e.g. PAM50 subtypes) would likely push performance higher, and is noted as a future improvement.
 
 ---
 
