@@ -1,24 +1,36 @@
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-Optuna--tuned-red?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-Pipeline-orange?logo=scikit-learn&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-deployed-FF4B4B?logo=streamlit&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![CI](https://img.shields.io/github/actions/workflow/status/syedahmadbokhari/breast-cancer-analysis/ci.yml?branch=metabric&label=CI)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 # 🧬 Breast Cancer Survival Prediction — METABRIC Dataset
 
 A machine learning project that predicts **breast cancer patient survival outcomes** (Living vs Deceased) using clinical data from the METABRIC dataset.
 
-This project demonstrates a **production-style end-to-end ML workflow**, including data preprocessing, model training, explainability, and deployment via API and web interface.
+This project demonstrates a **production-style end-to-end ML workflow**, including data preprocessing, model training, hyperparameter optimisation, explainability, and deployment via API and web interface.
 
 ---
 
 ## 🔬 Project Overview
 
-This project upgrades from a simple benchmark dataset to the **METABRIC dataset**, which reflects real-world clinical complexity.
+This project uses the **METABRIC dataset**, which reflects real-world clinical complexity — unlike simple benchmark datasets.
 
 The system includes:
 
 - Data preprocessing & feature engineering
+- Survival analysis with Kaplan-Meier curves
 - Training and comparison of multiple ML models
+- Hyperparameter optimisation with **Optuna** (40 trials)
+- Final model packaged as a **sklearn Pipeline** (scaler + XGBoost)
 - Model evaluation using ROC-AUC and classification metrics
 - Model explainability (Feature Importance + SHAP)
 - REST API using FastAPI
 - Interactive UI using Streamlit
-- Docker containerization
+- Docker containerisation
+- GitHub Actions CI
 
 ---
 
@@ -52,7 +64,7 @@ The system includes:
 ## 🔧 Machine Learning Pipeline
 
 ```text
-Data → Preprocessing → Feature Engineering → Model Training → Evaluation → Deployment
+Data → Preprocessing → Kaplan-Meier EDA → Model Training → Optuna Tuning → Pipeline → Deployment
 ```
 
 **Key Steps:**
@@ -60,11 +72,21 @@ Data → Preprocessing → Feature Engineering → Model Training → Evaluation
 1. Data cleaning & missing value imputation
 2. Encoding categorical variables
 3. Outlier handling (IQR capping)
-4. Feature scaling (StandardScaler)
+4. Kaplan-Meier survival curve analysis
 5. Train/test split (70/30, stratified)
-6. Model training (6 algorithms)
-7. Evaluation (ROC, confusion matrix)
-8. Explainability (Feature Importance + SHAP)
+6. 6-model comparison (baseline)
+7. XGBoost + Optuna hyperparameter tuning (40 trials)
+8. Final sklearn Pipeline: StandardScaler → XGBoost
+9. Evaluation (ROC, confusion matrix, classification report)
+10. Explainability (Feature Importance + SHAP)
+
+---
+
+## 📈 Survival Analysis — Kaplan-Meier Curves
+
+![Kaplan-Meier Curves](./images/kaplan_meier.png)
+
+Survival curves split by ER Status, HER2 Status, and Histologic Grade — showing how clinical subgroups diverge over time.
 
 ---
 
@@ -74,6 +96,7 @@ Data → Preprocessing → Feature Engineering → Model Training → Evaluation
 
 | Model | Accuracy |
 |---|---|
+| **XGBoost (Optuna-tuned)** | **~75%** |
 | SVM | 70.8% |
 | Random Forest | 69.6% |
 | Logistic Regression | 69.6% |
@@ -81,9 +104,10 @@ Data → Preprocessing → Feature Engineering → Model Training → Evaluation
 | Naive Bayes | 64.0% |
 | Decision Tree | 60.8% |
 
-**Selected Model: Random Forest**
-- `n_estimators = 200`
-- `class_weight = 'balanced'`
+**Final Model: XGBoost + StandardScaler Pipeline**
+- Tuned with Optuna (40 trials, 5-fold CV ROC-AUC objective)
+- `scale_pos_weight` for class imbalance
+- Packaged as a single `pipeline.pkl` — no separate scaler needed
 
 ---
 
@@ -91,8 +115,7 @@ Data → Preprocessing → Feature Engineering → Model Training → Evaluation
 
 ![ROC Curve](./images/roc_curve.png)
 
-- **ROC-AUC: 0.73**
-- Demonstrates realistic performance on clinical data
+**ROC-AUC: ~0.79** after Optuna tuning (vs 0.73 baseline Random Forest)
 
 ---
 
@@ -116,7 +139,7 @@ Data → Preprocessing → Feature Engineering → Model Training → Evaluation
 ### 🧠 Architecture
 
 ```
-User → Streamlit UI → FastAPI → ML Model → Prediction
+User → Streamlit UI → FastAPI → sklearn Pipeline → Prediction
 ```
 
 ### 🖥 Streamlit App
@@ -125,8 +148,9 @@ User → Streamlit UI → FastAPI → ML Model → Prediction
 streamlit run notebooks/app.py
 ```
 
-- Interactive UI for entering patient data
-- Real-time prediction with probabilities
+- Interactive UI with sidebar inputs grouped by clinical section
+- Colour-coded result card (green = Living, red = Deceased)
+- Probability bars with confidence score
 
 ### ⚡ FastAPI
 
@@ -134,7 +158,7 @@ streamlit run notebooks/app.py
 uvicorn notebooks.api:app --reload
 ```
 
-API available at `http://localhost:8000/docs`
+Interactive docs at `http://localhost:8000/docs`
 
 ### 🧪 Example Request
 
@@ -157,6 +181,17 @@ API available at `http://localhost:8000/docs`
 }
 ```
 
+**Example Response:**
+
+```json
+{
+  "prediction": "Living",
+  "living_probability": 0.71,
+  "deceased_probability": 0.29,
+  "confidence": 71.0
+}
+```
+
 ### 📦 Docker
 
 ```bash
@@ -171,19 +206,25 @@ docker run -p 8000:8000 breast-cancer-api
 ```
 Breast-Cancer-ML/
 │
+├── .github/
+│   └── workflows/
+│       └── ci.yml                       # GitHub Actions CI
 ├── data/
 │   └── Breast Cancer METABRIC.csv
 ├── models/
-│   ├── breast_cancer_model.pkl
+│   ├── pipeline.pkl                     # XGBoost Pipeline (scaler + model)
+│   ├── breast_cancer_model.pkl          # Baseline Random Forest (reference)
 │   └── scaler.pkl
 ├── notebooks/
-│   ├── Breast-Cancer-Analysis.ipynb
-│   ├── app.py
-│   ├── api.py
-│   └── predict.py
+│   ├── Breast-Cancer-Analysis.ipynb     # Full ML pipeline
+│   ├── app.py                           # Streamlit UI
+│   ├── api.py                           # FastAPI REST endpoint
+│   └── predict.py                       # Standalone script
 ├── images/
+│   ├── kaplan_meier.png
 │   ├── feature_importance.png
 │   └── roc_curve.png
+├── MODEL_CARD.md                        # Model documentation
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
@@ -193,31 +234,33 @@ Breast-Cancer-ML/
 
 ## ⚠️ Limitations
 
-- Moderate accuracy (~70%) due to real-world data complexity
-- Only clinical features used (no genomic data)
-- No time-to-event survival modeling (classification only)
+- Moderate accuracy (~75%) due to real-world data complexity
+- Clinical features only — no genomic or gene expression data
+- No time-to-event survival modelling (classification only)
+- Single cohort (UK/Canada) — may not generalise globally
 
 ---
 
 ## 🔮 Future Improvements
 
-- Add survival analysis (Cox proportional hazards model)
+- Add Cox proportional hazards survival model
 - Incorporate gene expression features
-- Implement monitoring & logging
+- Implement request logging and model monitoring
 - Add API authentication
-- Deploy using Kubernetes / AWS ECS
+- Deploy with Kubernetes / AWS ECS
 
 ---
 
 ## 🧠 Key Takeaways
 
 - Handling real-world healthcare datasets
-- Building production-style ML pipelines
+- Building production-style ML pipelines with sklearn `Pipeline`
+- Hyperparameter optimisation with Optuna
 - Deploying ML models via API + UI
-- Interpreting predictions responsibly
+- Interpreting predictions responsibly with SHAP
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is for **educational purposes only** and is not intended for medical use.
+This project is for **educational purposes only** and is not intended for medical use. See [MODEL_CARD.md](./MODEL_CARD.md) for full limitations and ethical considerations.

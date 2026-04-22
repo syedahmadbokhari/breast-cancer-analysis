@@ -1,6 +1,9 @@
 fastapi
 uvicorn
 scikit-learn
+xgboost
+optuna
+lifelines
 pandas
 numpy
 matplotlib
