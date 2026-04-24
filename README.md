@@ -41,9 +41,7 @@ The system includes:
 
 ## Live Demo
 
-[[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://breast-cancer-analysis-ktzyqyr4fcgbfx4exsd4q7.streamlit.app/)]
-
-(https://breast-cancer-analysis-7l9nquveqxobpqvtmo8hjp.streamlit.app/)
+[[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://breast-cancer-analysis-7l9nquveqxobpqvtmo8hjp.streamlit.app/)]
 
 ---
 
