@@ -14,3 +14,5 @@ logs/*.log
 # Local tooling
 .claude/
 patch_notebook.py
+fix_eval_cells.py
+fix_optuna_seed.py

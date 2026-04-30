@@ -50,12 +50,13 @@
 
 | Metric | Value |
 |---|---|
-| **Accuracy** | ~75% |
-| **ROC-AUC** | ~0.79 |
+| **Accuracy** | ~69% |
+| **ROC-AUC** | 0.74 |
 | **5-fold CV ROC-AUC** | mean ± std reported in notebook |
 | **Cox PH C-index** | reported in notebook |
 
 Evaluated on held-out 30% test set (stratified split, random_state=40).
+Fully reproducible: Optuna `TPESampler(seed=42)` + `XGBClassifier(random_state=42)`.
 
 ## Survival Modelling (Cox PH)
 

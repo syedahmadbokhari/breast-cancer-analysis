@@ -149,7 +149,7 @@ Raw XGBoost probabilities are over-confident. **Platt scaling** corrects the cal
 
 | Model | Accuracy |
 |---|---|
-| **XGBoost (Optuna-tuned)** | **~75%** |
+| **XGBoost (Optuna-tuned)** | **~69%** |
 | SVM | 70.8% |
 | Random Forest | 69.6% |
 | Logistic Regression | 69.6% |
@@ -158,11 +158,11 @@ Raw XGBoost probabilities are over-confident. **Platt scaling** corrects the cal
 | Decision Tree | 60.8% |
 
 **Final Model: XGBoost + StandardScaler Pipeline**
-- Tuned with Optuna (40 trials, 5-fold CV ROC-AUC objective)
+- Tuned with Optuna (40 trials, 5-fold CV ROC-AUC objective, `TPESampler(seed=42)`)
 - `scale_pos_weight` for class imbalance
 - Packaged as a single `pipeline.pkl` — no separate scaler needed
 
-> **On accuracy:** 75% on METABRIC is a strong result for a pure clinical feature model. This dataset reflects real-world complexity: the outcome (10+ year survival) depends on treatment decisions made decades ago, genomic factors not captured here, and competing causes of death unrelated to cancer. Published clinical survival models using similar feature sets (NPI-based tools, PREDICT) achieve 70–80% concordance on comparable cohorts. Incorporating gene expression data (e.g. PAM50 subtypes) would likely push performance higher, and is noted as a future improvement.
+> **On accuracy:** Accuracy is a misleading metric on this imbalanced dataset (837 Living vs 1,144 Deceased). The primary metric is **ROC-AUC (0.74)**, which measures discriminative ability across all thresholds and is invariant to class distribution. This result is consistent with published benchmarks for pure clinical-feature survival models — tools such as PREDICT and NPI-based scoring achieve 70–78% concordance on comparable METABRIC-era cohorts. Incorporating gene expression data (e.g. PAM50 subtypes) is expected to push performance meaningfully higher and is noted as a future improvement.
 
 ---
 
@@ -170,7 +170,7 @@ Raw XGBoost probabilities are over-confident. **Platt scaling** corrects the cal
 
 ![ROC Curve](./images/roc_curve.png)
 
-**ROC-AUC: ~0.79** after Optuna tuning (vs 0.73 baseline Random Forest)
+**ROC-AUC: 0.74** (reproducible — Optuna `TPESampler(seed=42)`, `random_state=42` throughout)
 
 ---
 
